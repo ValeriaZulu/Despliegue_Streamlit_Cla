@@ -39,27 +39,15 @@ import streamlit as st #solo se ejecuta en un servidor web
 
 st.markdown("""
 <style>
-    .stApp {
-        background-color: #FAF7FF;
-    }
+/* Línea base de los sliders */
+[data-baseweb="slider"] > div > div {
+    background-color: #D8C7F7 !important;
+}
 
-    h1 {
-        color: #6C3FC5;
-    }
-
-    div.stButton > button {
-        background-color: #6C3FC5;
-        color: white;
-        border-radius: 10px;
-        border: none;
-        padding: 10px 24px;
-        font-weight: bold;
-    }
-
-    div.stButton > button:hover {
-        background-color: #5428A3;
-        color: white;
-    }
+/* Parte seleccionada del slider */
+[data-baseweb="slider"] > div > div > div {
+    background-color: #6C3FC5 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -122,4 +110,15 @@ if predecir:
     st.success("✅ El modelo predice un caso negativo.")
 
 # Recordar medida de error del modelo
-  st.warning("El modelo tiene una precisión del 87.23% (accuracy)")
+  st.markdown("""
+  <div style="
+    background-color: #EDE3FF;
+    padding: 15px;
+    border-radius: 10px;
+    color: #4A287A;
+    font-size: 18px;
+    font-weight: bold;
+  ">
+    📊 Accuracy del modelo: 87.23%
+  </div>
+  """, unsafe_allow_html=True)
