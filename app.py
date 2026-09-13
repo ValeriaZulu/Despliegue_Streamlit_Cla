@@ -23,7 +23,7 @@ import matplotlib.pyplot as plt
 #Cargamos el modelo
 import pickle
 filename = 'modelo-cla.pkl'
-modelo, min_max_scaler, variables = pickle.load(open(filename, 'rb'))
+modelo, labelencoder, variables, min_max_scaler = pickle.load(open(filename, 'rb'))
 
 #modelo #me muestra qué modelo escogí
 
@@ -33,12 +33,43 @@ modelo, min_max_scaler, variables = pickle.load(open(filename, 'rb'))
 
 #Interfaz gráfica
 
-
 #Se crea interfaz gráfica con streamlit para captura de los datos
 
 import streamlit as st #solo se ejecuta en un servidor web
 
-st.title('Predicción de ataque al corazón')
+st.markdown("""
+<style>
+    .stApp {
+        background-color: #FAF7FF;
+    }
+
+    h1 {
+        color: #6C3FC5;
+    }
+
+    div.stButton > button {
+        background-color: #6C3FC5;
+        color: white;
+        border-radius: 10px;
+        border: none;
+        padding: 10px 24px;
+        font-weight: bold;
+    }
+
+    div.stButton > button:hover {
+        background-color: #5428A3;
+        color: white;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.title('🫀 Predicción de ataque al corazón')
+st.write(
+    "Ingresa las características del paciente para obtener "
+    "una predicción basada en el modelo de Machine Learning."
+)
+
+if st.button("Realizar predicción", use_container_width=True):
 
 #Configuramos las variables que hay que recibir, los nombres deben ser exactamente iguales
 age = st.slider('Edad', min_value=0, max_value=80, value=20, step=1)
@@ -46,41 +77,50 @@ hypertension = st.selectbox('Hipertensión', ["Yes", "No"])
 heart_disease = st.selectbox('Cardiopatía', ["Yes", "No"])
 ever_married = st.selectbox('Alguna vez casado', ["Yes", "No"])
 avg_glucose_level = st.slider('Nivel de glucosa', min_value=50.00, max_value=280.00, value=100.00, step=0.01)
-smoking_status = st.slider('Estado de fumador', ["'never smoked'", "Unknown", "'formerly smoked'", "'smokes'"])
+smoking_status = st.selectbox('Estado de fumador', ["'never smoked'", "Unknown", "'formerly smoked'", "'smokes'"])
 
 
 #Dataframe que integra esos datos
 datos = [[age, hypertension, heart_disease, ever_married, avg_glucose_level, smoking_status]]
 data = pd.DataFrame(datos, columns=['age', 'hypertension','heart_disease','ever_married','avg_glucose_level', 'smoking_status']) #Dataframe con los mismos nombres de variables
 
-#Se realiza la preparación de datos
-data_preparada=data.copy()
+#Botón
+predecir = st.button(
+    "🔍 Realizar predicción",
+    use_container_width=True
+)
 
-#En despliegue drop_first= False
-data_preparada = pd.get_dummies(data_preparada, columns=['age', 'hypertension','heart_disease','ever_married','avg_glucose_level', 'smoking_status'], drop_first=False, dtype=int)
-data_preparada.head()
+if predecir:
+  #Se realiza la preparación de datos
+  data_preparada=data.copy()
+
+  #En despliegue drop_first= False
+  data_preparada = pd.get_dummies(data_preparada, columns=['hypertension','heart_disease','ever_married', 'smoking_status'], drop_first=False, dtype=int)
+  data_preparada.head()
 
 #Se adicionan las columnas faltantes
-data_preparada=data_preparada.reindex(columns=variables,fill_value=0) #quita las variables que sobran y las que faltan las agrega con valor 0
-data_preparada.head()
+  data_preparada=data_preparada.reindex(columns=variables,fill_value=0) #quita las variables que sobran y las que faltan las agrega con valor 0
+  data_preparada.head()
 
 #Se normaliza la edad para predecir con Knn, Red, SVM, Reg
-#En los despliegues no se llama fit
-data_preparada[['age', 'avg_glucose_level']]= min_max_scaler.transform(data_preparada[['age','avg_glucose_level']])
-data_preparada.head()
+  #En los despliegues no se llama fit
+  data_preparada[['age', 'avg_glucose_level']]= min_max_scaler.transform(data_preparada[['age','avg_glucose_level']])
+  data_preparada.head()
 
-"""# **Predicciones**"""
+#Predicciones
 
 #Hacemos la predicción con knn
-Y_pred = modelo.predict(data_preparada)
-print(Y_pred)
+  Y_pred = modelo.predict(data_preparada)
+  print(Y_pred)
 
-data['Prediccion']=Y_pred
-data.head()
+  data['Prediccion']=Y_pred
+  data.head()
 
 #Predicciones finales
-data
+  if Y_pred[0] == 1:
+    st.error("⚠️ El modelo predice un posible caso positivo.")
+  else:
+    st.success("✅ El modelo predice un caso negativo.")
 
 # Recordar medida de error del modelo
-
-st.warning("El modelo tiene un error del 87.23% (accuracy)")
+  st.warning("El modelo tiene una precisión del 87.23% (accuracy)")
