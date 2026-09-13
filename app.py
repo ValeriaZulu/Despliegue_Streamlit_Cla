@@ -69,7 +69,6 @@ st.write(
     "una predicción basada en el modelo de Machine Learning."
 )
 
-if st.button("Realizar predicción", use_container_width=True):
 
 #Configuramos las variables que hay que recibir, los nombres deben ser exactamente iguales
 age = st.slider('Edad', min_value=0, max_value=80, value=20, step=1)
